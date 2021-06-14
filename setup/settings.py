@@ -34,7 +34,7 @@ EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
 EMAIL_PORT = config('EMAIL_PORT')
 EMAIL_FROM = config('EMAIL_FROM')
 DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL')
-EMAIL_USE_SSL = config('EMAIL_USE_SSL', default=False, cast=bool)
+# EMAIL_USE_SSL = config('EMAIL_USE_SSL', default=False, cast=bool)
 
 ADMINS = (
     ('You', 'you@email.com'),
@@ -61,6 +61,8 @@ INSTALLED_APPS = [
 
 
 AUTH_USER_MODEL = 'account.User'
+
+# PASSWORD_RESET_CONFIRM_URL = 'reset'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -131,13 +133,12 @@ SIMPLE_JWT = {
 }
 
 
-# DJOSER = {
-#     'PASSWORD_RESET_CONFIRM_URL': '#/password/reset/confirm/{uid}/{token}',
-#     'USERNAME_RESET_CONFIRM_URL': '#/username/reset/confirm/{uid}/{token}',
-#     'ACTIVATION_URL': '#/activate/{uid}/{token}',
-#     'SEND_ACTIVATION_EMAIL': True,
-#     'SERIALIZERS': {},
-# }
+DJOSER = {
+    'PASSWORD_RESET_CONFIRM_URL': 'account/reset/confirm/{uid}/{token}',
+    'ACTIVATION_URL': '#/activate/{uid}/{token}',
+    'SEND_ACTIVATION_EMAIL': True,
+    'SERIALIZERS': {},
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
