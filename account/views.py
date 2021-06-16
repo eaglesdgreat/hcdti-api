@@ -12,9 +12,7 @@ import uuid
 import math
 from datetime import datetime
 from .serializers import *
-from django.utils import timezone
 from django.shortcuts import get_object_or_404
-from datetime import timedelta
 import csv
 from .general import General
 new_fun = General()
@@ -87,7 +85,14 @@ def create_user(request):
                 return Response(data=data, status=status.HTTP_401_UNAUTHORIZED)
         
             else:
-                if User.objects.filter(email=email).exists():
+                if '@' not in email:
+                    data = {
+                        "code": status.HTTP_401_UNAUTHORIZED,
+                        "status": "fail",
+                        "reason": "email not correct"
+                    }
+                    return Response(data=data, status=status.HTTP_401_UNAUTHORIZED)
+                elif User.objects.filter(email=email).exists():
                     data = {
                         "code": status.HTTP_401_UNAUTHORIZED,
                         "status": "fail",
@@ -200,5 +205,140 @@ def update_user(request):
                 "status": "success"
             }
         return Response(data=data, status=status.HTTP_200_OK)
+
+
+## Update User Admin ##
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def update_user_admin(request, id):
+    staffname = request.data.get('staffname')
+    role = request.data.get('role')
+    if new_fun.check_logged_in_user(request) == False:
+        data = {
+            "code": status.HTTP_401_UNAUTHORIZED,
+            "status": "fail",
+            "reason": "permission denied"
+        }
+        return Response(data=data, status=status.HTTP_401_UNAUTHORIZED)
+    elif User.objects.filter(id=id).exists() == False:
+        data = {
+            "code": status.HTTP_401_UNAUTHORIZED,
+            "status": "fail",
+            "reason": "User doesn't Exists"
+        }
+        return Response(data=data, status=status.HTTP_401_UNAUTHORIZED)
+    else:
+        if new_fun.upadate_user_admin(id, staffname, role) == False:
+            data = {
+                "code": status.HTTP_401_UNAUTHORIZED,
+                "status": "fail",
+                "reason": "invalid role parameter. value should be 'super, credit_officer, branch_manager, senior_manager or agency_bank'"
+            }
+            return Response(data=data, status=status.HTTP_401_UNAUTHORIZED)
+        else:
+            new_fun.upadate_user_admin(id, staffname, role)
+            data = {
+                "code": status.HTTP_200_OK,
+                "status": "successfull",
+                "reason": "record updated"
+            }
+            return Response(data=data, status=status.HTTP_200_OK)
+        
+## Reset Password ##
+@api_view(['POST'])
+@permission_classes([])
+def reset_password_otp(request):
+    email = request.data.get('email')
+    if '@' not in email:
+        data = {
+            "code": status.HTTP_401_UNAUTHORIZED,
+            "status": "fail",
+            "reason": "email not correct"
+        }
+        return Response(data=data, status=status.HTTP_401_UNAUTHORIZED)
+    elif User.objects.filter(email=email).exists() == False:
+        data = {
+            "code": status.HTTP_401_UNAUTHORIZED,
+            "status": "fail",
+            "reason": "Invalid Email or User doesn't Exists"
+        }
+        return Response(data=data, status=status.HTTP_401_UNAUTHORIZED)
+    else:
+        if Otp.objects.filter(email=email).exists() == True:
+            delt_otp = Otp.objects.filter(email=email)
+            delt_otp.delete()
+            new_fun.create_otp(email)
+            data = {
+                "code": status.HTTP_200_OK,
+                "status": "successfull",
+                "reason": "Check Your registerd email for OTP to reset your account"
+            }
+            return Response(data=data, status=status.HTTP_200_OK)
+        else:
+            new_fun.create_otp(email)
+            data = {
+                "code": status.HTTP_200_OK,
+                "status": "successfull",
+                "reason": "Check Your registerd email for OTP to reset your account"
+            }
+            return Response(data=data, status=status.HTTP_200_OK)
+
+## Reset password confirm ##
+@api_view(['POST'])
+@permission_classes([])
+def reset_password_confirm(request):
+    otp_code = request.data.get('otp_code')
+    password = request.data.get('password')
+    re_password = request.data.get('re_password')
+    if otp_code == "":
+        data = {
+            "code": status.HTTP_401_UNAUTHORIZED,
+            "status": "fail",
+            "reason": "OTP Required"
+        }
+        return Response(data=data, status=status.HTTP_401_UNAUTHORIZED)
+    elif password == "" or re_password == "":
+        data = {
+            "code": status.HTTP_401_UNAUTHORIZED,
+            "status": "fail",
+            "reason": "Password Required"
+        }
+        return Response(data=data, status=status.HTTP_401_UNAUTHORIZED)
+    elif password == re_password:
+        if Otp.objects.filter(otp_code=otp_code).exists():
+            if new_fun.check_otp(otp_code) == False:
+                Otp.objects.filter(otp_code=otp_code).delete()
+                data = {
+                    "code": status.HTTP_401_UNAUTHORIZED,
+                    "status": "fail",
+                    "reason": "OTP Expired"
+                }
+                return Response(data=data, status=status.HTTP_401_UNAUTHORIZED)
+            else:
+                o = get_object_or_404(Otp, otp_code=otp_code)
+                u = User.objects.get(email=o.email)
+                u.set_password(password)
+                u.save()
+                Otp.objects.filter(otp_code=otp_code).delete()
+                data = {
+                    "code": status.HTTP_200_OK,
+                    "status": "successfull",
+                    "reason": "password reset sucessfully"
+                }
+                return Response(data=data, status=status.HTTP_200_OK)
+        
+        else:
+            data = {
+                "code": status.HTTP_401_UNAUTHORIZED,
+                "status": "fail",
+                "reason": "Invalid OTP"
+            }
+            return Response(data=data, status=status.HTTP_401_UNAUTHORIZED)
     
-    
+    else:
+        data = {
+            "code": status.HTTP_401_UNAUTHORIZED,
+            "status": "fail",
+            "reason": "Password Missmatch"
+        }
+        return Response(data=data, status=status.HTTP_401_UNAUTHORIZED)

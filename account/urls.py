@@ -11,4 +11,7 @@ urlpatterns = [
     path('get_all_user', views.get_all_user),
     path('delete_user/<id>', views.delete_user),
     path('update_user', views.update_user),
+    path('update_user_admin/<id>', views.update_user_admin),
+    path('reset_password_otp', views.reset_password_otp),
+    path('reset_password_confirm', views.reset_password_confirm),
 ]

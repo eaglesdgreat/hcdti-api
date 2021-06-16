@@ -14,3 +14,12 @@ class Email:
         msg.attach_alternative(html_content, "text/html")
         msg.send()
         pass
+    
+    def otp(self, email, otp, staffname):
+        subject, from_email, to = 'OTP', EMAIL_FROM, email
+        html_content = render_to_string('email/otp.html', {'staffname': staffname, 'otp': otp})
+        text_content = strip_tags(html_content)
+        msg = EmailMultiAlternatives(subject, text_content, from_email, [to])
+        msg.attach_alternative(html_content, "text/html")
+        msg.send()
+        pass

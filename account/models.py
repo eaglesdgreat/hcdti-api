@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import PermissionsMixin
 from django.contrib.auth.models import AbstractBaseUser, UserManager, BaseUserManager
+from django.http import request
 from django.utils.translation import ugettext_lazy as _
 from django.conf import settings
 from django.contrib.sessions.models import Session
@@ -67,3 +68,12 @@ class UserSession(models.Model):
 
     class Meta:
         db_table = 'user_session'
+        
+
+class Otp(models.Model):
+    email = models.EmailField(null=True)
+    otp_code = models.TextField(null=True)
+    dt_created = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        db_table = 'otp'
