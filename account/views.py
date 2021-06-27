@@ -342,3 +342,29 @@ def reset_password_confirm(request):
             "reason": "Password Missmatch"
         }
         return Response(data=data, status=status.HTTP_401_UNAUTHORIZED)
+    
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_single_user(request, id):
+    if new_fun.check_logged_in_user(request) == False:
+        data = {
+            "code": status.HTTP_401_UNAUTHORIZED,
+            "status": "fail",
+            "reason": "permission denied"
+        }
+        return Response(data=data, status=status.HTTP_401_UNAUTHORIZED)
+    else:
+        try:
+            u = get_object_or_404(User, id=id)
+            serialize = LoggedInUserSerializer(instance=u)
+            return Response(data=serialize.data, status=status.HTTP_200_OK)
+        
+        except:
+            data = {
+                "code": status.HTTP_401_UNAUTHORIZED,
+                "status": "fail",
+                "reason": "User Not found"
+            }
+            return Response(data=data, status=status.HTTP_401_UNAUTHORIZED)
+    

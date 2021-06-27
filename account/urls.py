@@ -1,4 +1,3 @@
-from account.views import create_user, logged_in_user
 from django.urls import path, include
 from . import views
 
@@ -14,4 +13,5 @@ urlpatterns = [
     path('update_user_admin/<id>', views.update_user_admin),
     path('reset_password_otp', views.reset_password_otp),
     path('reset_password_confirm', views.reset_password_confirm),
+    path('get_single_user/<id>', views.get_single_user),
 ]
