@@ -1,3 +1,4 @@
+from datetime import date
 from django.db import models
 from django.contrib.auth.models import PermissionsMixin
 from django.contrib.auth.models import AbstractBaseUser, UserManager, BaseUserManager
@@ -77,3 +78,23 @@ class Otp(models.Model):
     
     class Meta:
         db_table = 'otp'
+        
+class Groups(models.Model):
+    group_id = models.CharField(max_length=100, null=True)
+    group_name = models.TextField(null=True)
+    date_created = models.DateField(auto_now=True)
+    
+    class Meta:
+        db_table = 'groups'
+        
+
+class GroupMember(models.Model):
+    group = models.ForeignKey(Groups, on_delete=models.CASCADE)
+    groups_id = models.TextField(null=True)
+    member_name = models.TextField(null=True)
+    mobile_number = models.TextField(null=True)
+    is_leader = models.BooleanField(null=True)
+    date_added = models.DateField(auto_now=True)
+    
+    class Meta:
+        db_table = 'group_member'

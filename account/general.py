@@ -196,3 +196,25 @@ class General:
         else:
             
             return True
+        
+    """Create Group Class Object"""
+    def create_group(self, group_name):
+        T = 5
+        res = ''.join(random.choices(string.digits, k=T))
+        code = str(res)
+        groups_id = f'G{code}'
+        cr_grp = Groups(group_name=group_name, group_id=groups_id)
+        cr_grp.save()
+        pass
+   
+   
+    """Add Member to Group"""
+    def add_member_group(self, group_id, member_name, mobile_number, is_leader):
+        grp = get_object_or_404(Groups, group_id=group_id)
+        cr_mem = GroupMember(group_id=grp.id, 
+                             groups_id=group_id, 
+                             member_name=member_name, 
+                             mobile_number=mobile_number, 
+                             is_leader=is_leader)
+        cr_mem.save()
+        pass
