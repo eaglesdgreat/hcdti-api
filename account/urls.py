@@ -25,4 +25,5 @@ urlpatterns = [
     path('get_group_member/<group_id>', views.get_group_member),
     path('groupbyid/<id>', views.get_single_group),
     path('getsinglemember/<id>', views.get_single_member),
+    path('changeleader/<group_id>/<mobileNumber>', views.change_group_leader),
 ]

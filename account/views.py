@@ -413,12 +413,16 @@ def get_all_group(request):
     all_groups = []
     show = Groups.objects.filter()
     for i in show:
-        total_member = GroupMember.objects.filter(groups_id=i.group_id, id=i.id).count()
+        total_member = GroupMember.objects.filter(groups_id=i.group_id).count()
+        grp_m = get_object_or_404(GroupMember, groups_id=i.group_id, is_leader=True)
         datas = {}
+        datas['id'] = i.id
         datas['groupId'] = i.group_id
         datas['groupName'] = i.group_name
         datas['dateCreated'] = i.date_created
         datas['totalMember'] = total_member
+        datas['leaderName'] = grp_m.member_name
+        datas['mobileNumber'] = grp_m.mobile_number
         all_groups.append(datas)
     
     """Paginate the Response"""
@@ -797,5 +801,56 @@ def get_single_member(request, id):
                 "isLeader": mem.is_leader,
                 "dateAdded": mem.date_added
             }
+        }
+        return Response(data=data, status=status.HTTP_200_OK)
+    
+    
+    
+"""Change Group Leader"""
+@api_view(['PUT'])
+@permission_classes([IsAuthenticated])
+def change_group_leader(request, group_id, mobileNumber):
+    if request.user.is_credit_officer == False and request.user.is_superuser is not True:
+        data = {
+            "code": status.HTTP_401_UNAUTHORIZED,
+            "status": "fail",
+            "reason": "Permission Denied. Only Super Admin and Credit Officer can perform group management"
+        }
+        return Response(data=data, status=status.HTTP_401_UNAUTHORIZED)
+    
+    elif Groups.objects.filter(group_id=group_id).exists() == False:
+        data = {
+            "code": status.HTTP_401_UNAUTHORIZED,
+            "status": "fail",
+            "reason": "Invalid Group ID"
+        }
+        return Response(data=data, status=status.HTTP_401_UNAUTHORIZED)
+    
+    elif GroupMember.objects.filter(groups_id=group_id, mobile_number=mobileNumber).exists() == False:
+        data = {
+            "code": status.HTTP_401_UNAUTHORIZED,
+            "status": "fail",
+            "reason": "User is not a group member or does not exist"
+        }
+        return Response(data=data, status=status.HTTP_401_UNAUTHORIZED)
+    elif GroupMember.objects.filter(groups_id=group_id, mobile_number=mobileNumber, is_leader=True).exists():
+        data = {
+            "code": status.HTTP_401_UNAUTHORIZED,
+            "status": "fail",
+            "reason": "This Member is already the leader of this group"
+        }
+        return Response(data=data, status=status.HTTP_401_UNAUTHORIZED)
+    else:
+        """Unset the Old Leader"""
+        old = GroupMember.objects.filter(groups_id=group_id)
+        old.update(is_leader=False)
+        
+        """Set the New Leader"""
+        new_leader = GroupMember.objects.filter(groups_id=group_id, mobile_number=mobileNumber)
+        new_leader.update(is_leader=True)
+        data = {
+            "code": status.HTTP_200_OK,
+            "status": "success",
+            "reason": "New Group Leader Set"
         }
         return Response(data=data, status=status.HTTP_200_OK)
