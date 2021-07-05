@@ -415,15 +415,31 @@ def get_all_group(request):
     for i in show:
         total_member = GroupMember.objects.filter(groups_id=i.group_id).count()
         """get The Member"""
-        grp_m = get_object_or_404(GroupMember, groups_id=i.group_id, is_leader=True)
-        datas = {}
-        datas['id'] = i.id
-        datas['groupId'] = i.group_id
-        datas['groupName'] = i.group_name
-        datas['dateCreated'] = i.date_created
-        datas['totalMember'] = total_member
-        datas['leaderName'] = grp_m.member_name
-        datas['mobileNumber'] = grp_m.mobile_number
+        try:
+            grp_m = get_object_or_404(GroupMember, groups_id=i.group_id, is_leader=True)
+            # grp_m = GroupMember.objects.filter(groups_id=i.group_id, is_leader=True)
+            # finals = new_fun.get_group_leader(i.group_id)
+        
+            # if grp_m.is_leader == False: continue
+            datas = {}
+            datas['id'] = i.id
+            datas['groupId'] = i.group_id
+            datas['groupName'] = i.group_name
+            datas['dateCreated'] = i.date_created
+            datas['totalMember'] = total_member
+            datas['leaderName'] = grp_m.member_name
+            datas['mobileNumber'] = grp_m.mobile_number
+            datas['active'] = i.active
+        except:
+            datas = {}
+            datas['id'] = i.id
+            datas['groupId'] = i.group_id
+            datas['groupName'] = i.group_name
+            datas['dateCreated'] = i.date_created
+            datas['totalMember'] = total_member
+            datas['active'] = i.active
+            # datas['leaderName'] = grp_m.member_name
+            # datas['mobileNumber'] = grp_m.mobile_number
         all_groups.append(datas)
     
     """Paginate the Response"""
@@ -855,3 +871,42 @@ def change_group_leader(request, group_id, mobileNumber):
             "reason": "New Group Leader Set"
         }
         return Response(data=data, status=status.HTTP_200_OK)
+
+"""Admin Reset Password"""
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def admin_reset_password(request, id):
+    new_password = request.data.get('new_password')
+    re_password = request.data.get('re_password')
+    if new_fun.check_logged_in_user(request) == False:
+        data = {
+            "code": status.HTTP_401_UNAUTHORIZED,
+            "status": "fail",
+            "reason": "permission denied"
+        }
+        return Response(data=data, status=status.HTTP_401_UNAUTHORIZED)
+    elif User.objects.filter(id=id).exists() == False:
+        data = {
+            "code": status.HTTP_401_UNAUTHORIZED,
+            "status": "fail",
+            "reason": "User does not exist"
+        }
+        return Response(data=data, status=status.HTTP_401_UNAUTHORIZED)
+    else:
+        if new_password == re_password:
+            u = User.objects.get(id=id)
+            u.set_password(new_password)
+            u.save()
+            data = {
+                "code": status.HTTP_200_OK,
+                "status": "success",
+                "reason": "Password Reset Successfully"
+            }
+            return Response(data=data, status=status.HTTP_200_OK)
+        else:
+            data = {
+                "code": status.HTTP_401_UNAUTHORIZED,
+                "status": "fail",
+                "reason": "Password Miss-Match"
+            }
+            return Response(data=data, status=status.HTTP_401_UNAUTHORIZED)

@@ -82,6 +82,7 @@ class Otp(models.Model):
 class Groups(models.Model):
     group_id = models.CharField(max_length=100, null=True)
     group_name = models.TextField(null=True)
+    active = models.BooleanField(default=False)
     date_created = models.DateField(auto_now=True)
     
     class Meta:

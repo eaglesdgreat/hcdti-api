@@ -211,10 +211,21 @@ class General:
     """Add Member to Group"""
     def add_member_group(self, group_id, member_name, mobile_number, is_leader):
         grp = get_object_or_404(Groups, group_id=group_id)
-        cr_mem = GroupMember(group_id=grp.id, 
-                             groups_id=group_id, 
-                             member_name=member_name, 
-                             mobile_number=mobile_number, 
-                             is_leader=is_leader)
-        cr_mem.save()
+        grpm = GroupMember.objects.filter(groups_id=grp.group_id).count()
+        print(grpm)
+        if grpm >= 5:
+            cr_mem = GroupMember(group_id=grp.id, 
+                                groups_id=group_id, 
+                                member_name=member_name, 
+                                mobile_number=mobile_number, 
+                                is_leader=is_leader)
+            cr_mem.save()
+            Groups.objects.filter(group_id=group_id).update(active=True)
+        else:
+            cr_mem = GroupMember(group_id=grp.id, 
+                                groups_id=group_id, 
+                                member_name=member_name, 
+                                mobile_number=mobile_number, 
+                                is_leader=is_leader)
+            cr_mem.save()
         pass
