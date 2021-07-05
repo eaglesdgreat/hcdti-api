@@ -414,6 +414,7 @@ def get_all_group(request):
     show = Groups.objects.filter()
     for i in show:
         total_member = GroupMember.objects.filter(groups_id=i.group_id).count()
+        """get The Member"""
         grp_m = get_object_or_404(GroupMember, groups_id=i.group_id, is_leader=True)
         datas = {}
         datas['id'] = i.id
@@ -699,7 +700,7 @@ def get_group_member(request, group_id):
             members.append(datas)
             
         paginator = PageNumberPagination()
-        paginator.page_size = 2
+        paginator.page_size = 5
         result_page = paginator.paginate_queryset(members, request)
         data = {
             "code": status.HTTP_200_OK,
