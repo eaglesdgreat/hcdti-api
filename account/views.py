@@ -443,10 +443,10 @@ def get_all_group(request):
         all_groups.append(datas)
     
     """Paginate the Response"""
-    paginator = PageNumberPagination()
-    paginator.page_size = 5
-    result_page = paginator.paginate_queryset(all_groups, request)
-    return paginator.get_paginated_response(data=result_page)    
+    # paginator = PageNumberPagination()
+    # paginator.page_size = 5
+    # result_page = paginator.paginate_queryset(all_groups, request)
+    return Response(data=all_groups, status=status.HTTP_200_OK)    
 
 
 """Add Member to Group"""
@@ -537,10 +537,10 @@ def get_all_group_member(request):
             all_member.append(datas)
         
         """Paginate the response"""
-        paginator = PageNumberPagination()
-        paginator.page_size = 5
-        result_page = paginator.paginate_queryset(all_member, request)
-        return paginator.get_paginated_response(data=result_page)
+        # paginator = PageNumberPagination()
+        # paginator.page_size = 5
+        # result_page = paginator.paginate_queryset(all_member, request)
+        return Response(data=all_member, status=status.HTTP_200_OK)
 
 
 """Delete Group"""
@@ -715,18 +715,18 @@ def get_group_member(request, group_id):
             datas['dateJoined'] = i.date_added
             members.append(datas)
             
-        paginator = PageNumberPagination()
-        paginator.page_size = 5
-        result_page = paginator.paginate_queryset(members, request)
+        # paginator = PageNumberPagination()
+        # paginator.page_size = 5
+        # result_page = paginator.paginate_queryset(members, request)
         data = {
             "code": status.HTTP_200_OK,
             "status": "success",
             "groupName": grp.group_name,
             "groupId": grp.group_id,
-            "result": result_page
+            "result": members
         }
         
-        return paginator.get_paginated_response(data=data)
+        return Response(data=data, status=status.HTTP_200_OK)
 
 
 

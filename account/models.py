@@ -61,6 +61,10 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     class Meta:
         db_table = 'user'
+    
+    def __str__(self):
+        """Return a human readable representation of the model instance."""
+        return "{}".format(self.email)
 
 
 class UserSession(models.Model):
@@ -69,6 +73,10 @@ class UserSession(models.Model):
 
     class Meta:
         db_table = 'user_session'
+    
+    def __str__(self):
+        """Return a human readable representation of the model instance."""
+        return "{}".format(self.user)
         
 
 class Otp(models.Model):
@@ -79,6 +87,10 @@ class Otp(models.Model):
     class Meta:
         db_table = 'otp'
         
+    def __str__(self):
+        """Return a human readable representation of the model instance."""
+        return "{}".format(self.email)
+        
 class Groups(models.Model):
     group_id = models.CharField(max_length=100, null=True)
     group_name = models.TextField(null=True)
@@ -87,6 +99,10 @@ class Groups(models.Model):
     
     class Meta:
         db_table = 'groups'
+    
+    def __str__(self):
+        """Return a human readable representation of the model instance."""
+        return "{}".format(self.group_id)
         
 
 class GroupMember(models.Model):
@@ -99,3 +115,66 @@ class GroupMember(models.Model):
     
     class Meta:
         db_table = 'group_member'
+        
+    def __str__(self):
+        """Return a human readable representation of the model instance."""
+        return "{}".format(self.group)
+        
+        
+class LoanApplication(models.Model):
+    application_id = models.TextField(blank=True, null=True)
+    app_type = models.TextField(null=True, blank=True)
+    form_no = models.TextField(null=True, blank=True)
+    state = models.TextField(null=True, blank=True)
+    member_no = models.TextField(blank=True, null=True)
+    branch = models.TextField(null=True, blank=True)
+    date_of_app = models.DateField(auto_now=True)
+    fullname = models.TextField(null=True, blank=True)
+    name_of_father = models.TextField(null=True, blank=True)
+    phoneno = models.TextField(null=True, blank=True)
+    residence_address = models.TextField(null=True, blank=True)
+    permanent_address = models.TextField(null=True, blank=True)
+    marital_status = models.TextField(null=True, blank=True)
+    formal_edu = models.TextField(null=True, blank=True)
+    next_of_kin = models.TextField(null=True, blank=True)
+    phone_next_of_kin = models.TextField(null=True, blank=True)
+    group_of_app = models.TextField(null=True, blank=True)
+    date_of_membership = models.DateField(null=True, blank=True)
+    type_of_business = models.TextField(null=True, blank=True)
+    business_duration = models.TextField(null=True, blank=True)
+    busness_address = models.TextField(null=True, blank=True)
+    family_on_hcdti_group = models.BooleanField(null=True, blank=True)
+    amt_savings_in_passbook = models.FloatField(null=True, blank=True)
+    bank = models.TextField(null=True, blank=True)
+    account_no = models.TextField(null=True, blank=True)
+    last_loan_recieved = models.FloatField(null=True, blank=True)
+    date_last_loan_repaid = models.DateField(null=True, blank=True)
+    loan_applied_for = models.FloatField(null=True, blank=True)
+    indepted_to_mfb_mfi = models.BooleanField(null=True, blank=True)
+    outsanding = models.TextField(null=True, blank=True)
+    name_of_guarantor = models.TextField(null=True, blank=True)
+    guarantor_relationship = models.TextField(null=True, blank=True)
+    guarantor_occupation = models.TextField(blank=True, null=True)
+    guarantor_home_address = models.TextField(blank=True, null=True)
+    guarantor_office_address = models.TextField(blank=True, null=True)
+    rec_from_group_1 = models.TextField(blank=True, null=True)
+    rec_from_group_2 = models.TextField(blank=True, null=True)
+    credit_officer_approve = models.CharField(max_length=100, default="APPROVED")
+    credit_officer_name = models.TextField(blank=True, null=True)
+    branch_manager_approve = models.CharField(max_length=100, default="PENDING")
+    branch_manager_name = models.TextField(blank=True, null=True)
+    branch_manager_reason = models.TextField(blank=True, null=True)
+    bm_date_action = models.DateField(blank=True, null=True)
+    senior_manager_approve = models.CharField(max_length=100, default="PENDING")
+    senior_manager_name = models.TextField(blank=True, null=True)
+    senior_manager_reason = models.TextField(blank=True, null=True)
+    sm_date_action = models.DateField(blank=True, null=True)
+    
+    
+    
+    class Meta:
+        db_table = 'loan_application'
+        
+    def __str__(self):
+        """Return a human readable representation of the model instance."""
+        return "{}".format(self.form_no)

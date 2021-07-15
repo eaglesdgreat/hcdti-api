@@ -1,4 +1,4 @@
-#!/Users/ittrade/PycharmProjects/hcdtiproject/env/bin/python3
+#!/Users/hollajobs/Documents/PythonProject/hcdtiproject/env/bin/python3
 # When the django-admin.py deprecation ends, remove this script.
 import warnings
 
