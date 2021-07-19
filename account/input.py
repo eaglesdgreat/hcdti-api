@@ -82,6 +82,21 @@ class Input:
         state = request.data.get('state')
         memberNo = request.data.get('memberNo')
         branch = request.data.get('branch')
+        nameOfFather = request.data.get('nameOfFather')
+        residenceAddress = request.data.get('residenceAddress')
+        permanentAddress = request.data.get('permanentAddress')
+        maritalStatus = request.data.get('maritalStatus')
+        formalEdu = request.data.get('formalEdu')
+        nextOfKin = request.data.get('nextOfKin')
+        phoneNextOfKin = request.data.get('phoneNextOfKin')
+        groupOfApp = request.data.get('groupOfApp')
+        bank = request.data.get('bank')
+        accountNo = request.data.get('accountNo')
+        typeOfBusiness = request.data.get('typeOfBusiness')
+        businessDuration = request.data.get('businessDuration')
+        amtSavingsInPassbook = request.data.get('amtSavingsInPassbook')
+        busnessAddress = request.data.get('busnessAddress')
+        familyOnHcdtiGroup = request.data.get('familyOnHcdtiGroup')
         lastLoanRecieved = request.data.get('lastLoanRecieved')
         dateLastLoanRepaid = request.data.get('dateLastLoanRepaid')
         loanAppliedFor = request.data.get('loanAppliedFor')
@@ -101,6 +116,21 @@ class Input:
             "state": state,
             "memberNo": memberNo,
             "branch": branch,
+            "nameOfFather": nameOfFather,
+            "residenceAddress": residenceAddress,
+            "permanentAddress": permanentAddress,
+            "maritalStatus": maritalStatus,
+            "formalEdu": formalEdu,
+            "nextOfKin": nextOfKin,
+            "groupOfApp": groupOfApp,
+            "bank": bank,
+            "accountNo": accountNo,
+            "typeOfBusiness": typeOfBusiness,
+            "businessDuration": businessDuration,
+            "phoneNextOfKin": phoneNextOfKin,
+            "amtSavingsInPassbook": amtSavingsInPassbook,
+            "busnessAddress": busnessAddress,
+            "familyOnHcdtiGroup": familyOnHcdtiGroup,
             "lastLoanRecieved": lastLoanRecieved,
             "dateLastLoanRepaid": dateLastLoanRepaid,
             "loanAppliedFor": loanAppliedFor,

@@ -27,4 +27,5 @@ urlpatterns = [
     path('getsinglemember/<id>', views.get_single_member),
     path('changeleader/<group_id>/<mobileNumber>', views.change_group_leader),
     path('admin_reset_password/<id>', views.admin_reset_password),
+    path('oldloan/', views.oldCustomerBookLoan),
 ]

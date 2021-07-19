@@ -3,6 +3,8 @@ from .models import *
 import random
 import string
 from django.utils import timezone
+from rest_framework.response import Response
+from rest_framework import status
 from datetime import timedelta
 from .send_email import Email
 
@@ -10,7 +12,6 @@ sendMail = Email()
 
 max_loan = 40000.0
 min_loan = 20000.0
-
 
 
 class General:
@@ -240,17 +241,35 @@ class General:
 
     """Create Loan for Existing Customer"""
 
-    def createLoanExistingCustomer(self, data):
+    def createLoanExistingCustomer(self, request, data):
+        T = 8
+        res = ''.join(random.choices(string.digits, k=T))
+        loanId = str(res)
         app_type = data["app_type"]
         formNo = data["formNo"]
         state = data["state"]
         memberNo = data["memberNo"]
         branch = data["branch"]
+        nameOfFather = data["nameOfFather"]
+        residenceAddress = data["residenceAddress"]
+        permanentAddress = data["permanentAddress"]
+        maritalStatus = data["maritalStatus"]
+        formalEdu = data["formalEdu"]
+        nextOfKin = data["nextOfKin"]
+        phoneNextOfKin = data["phoneNextOfKin"]
+        groupOfApp = data["groupOfApp"]
         lastLoanRecieved = data["lastLoanRecieved"]
         dateLastLoanRepaid = data["dateLastLoanRepaid"]
         loanAppliedFor = data["loanAppliedFor"]
         indeptedToMfbMfi = data["indeptedToMfbMfi"]
         outsanding = data["outsanding"]
+        bank = data["bank"]
+        accountNo = data["accountNo"]
+        typeOfBusiness = data["typeOfBusiness"]
+        businessDuration = data["businessDuration"]
+        amtSavingsInPassbook = data["amtSavingsInPassbook"]
+        busnessAddress = data["busnessAddress"]
+        familyOnHcdtiGroup = data["familyOnHcdtiGroup"]
         nameOfGuarantor = data["nameOfGuarantor"]
         guarantorRelationship = data["guarantorRelationship"]
         guarantorOccupation = data["guarantorOccupation"]
@@ -258,4 +277,67 @@ class General:
         guarantorOfficeAddress = data["guarantorOfficeAddress"]
         recFromGroup1 = data["recFromGroup1"]
         recFromGroup2 = data["recFromGroup2"]
-        pass
+        creditOfficerName = request.user.staffname
+
+        newAmt = float(loanAppliedFor)
+        try:
+            gpm = get_object_or_404(GroupMember, mobile_number=memberNo)
+            while newAmt >= min_loan and newAmt <= max_loan:
+                gp = get_object_or_404(Groups, group_id=gpm.groups_id)
+                while gp.active == True and GroupMember.objects.filter(groups_id=gp.group_id).count() >= 5:
+                    if LoanApplication.objects.filter(member_no=memberNo).exists():
+                        datas = {
+                            "code": status.HTTP_401_UNAUTHORIZED,
+                            "status": "fail",
+                            "reason": "Customer already have active Application"
+                        }
+                        return Response(data=datas, status=status.HTTP_401_UNAUTHORIZED)
+                    else:
+                        createLoan = LoanApplication(
+                            application_id=loanId, app_type=app_type,
+                            form_no=formNo, state=state, member_no=memberNo,
+                            branch=branch, fullname=gpm.member_name,
+                            name_of_father=nameOfFather, phoneno=memberNo,
+                            residence_address=residenceAddress,
+                            permanent_address=permanentAddress,
+                            marital_status=maritalStatus, formal_edu=formalEdu,
+                            next_of_kin=nextOfKin, phone_next_of_kin=phoneNextOfKin,
+                            group_of_app=groupOfApp, date_of_membership=gpm.date_added,
+                            type_of_business=typeOfBusiness, business_duration=businessDuration,
+                            busness_address=busnessAddress, family_on_hcdti_group=familyOnHcdtiGroup,
+                            amt_savings_in_passbook=amtSavingsInPassbook, bank=bank,
+                            account_no=accountNo, last_loan_recieved=lastLoanRecieved,
+                            date_last_loan_repaid=dateLastLoanRepaid, loan_applied_for=loanAppliedFor,
+                            indepted_to_mfb_mfi=indeptedToMfbMfi, outsanding=outsanding,
+                            name_of_guarantor=nameOfGuarantor, guarantor_relationship=guarantorRelationship,
+                            guarantor_occupation=guarantorOccupation, guarantor_home_address=guarantorHomeAddress,
+                            guarantor_office_address=guarantorOfficeAddress, rec_from_group_1=recFromGroup1,
+                            rec_from_group_2=recFromGroup2, credit_officer_name=creditOfficerName)
+                        createLoan.save()
+                        datas = {
+                            "code": status.HTTP_200_OK,
+                            "status": "success",
+                            "message": f'Loan Application with Booking ID: {loanId} was Successful'
+                        }
+                        return Response(data=datas, status=status.HTTP_200_OK)
+                else:
+                    datas = {
+                        "code": status.HTTP_401_UNAUTHORIZED,
+                        "status": "fail",
+                        "reason": "Group is not Active or Group member is not up to 5"
+                    }
+                    return Response(data=datas, status=status.HTTP_401_UNAUTHORIZED)
+            else:
+                datas = {
+                    "code": status.HTTP_401_UNAUTHORIZED,
+                    "status": "fail",
+                    "reason": "Invalid Amount...Min N20,000 & Max N40,000"
+                }
+                return Response(data=datas, status=status.HTTP_401_UNAUTHORIZED)
+        except:
+            datas = {
+                "code": status.HTTP_401_UNAUTHORIZED,
+                "status": "fail",
+                "reason": "Customer does not exist in any group"
+            }
+            return Response(data=datas, status=status.HTTP_401_UNAUTHORIZED)

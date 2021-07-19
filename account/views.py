@@ -958,3 +958,5 @@ def oldCustomerBookLoan(request):
     else:
         """Call the Input Fields"""
         data = newInput.oldLoanInput(request)
+        resp = new_fun.createLoanExistingCustomer(request, data)
+        return resp
