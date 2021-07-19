@@ -4,36 +4,36 @@ from account.models import *
 
 
 class LoggedInUserSerializer(serializers.ModelSerializer):
-    
+
     class Meta:
         model = User
-        fields =  [
+        fields = [
             'id',
             'staffname',
-            'email', 
+            'email',
             'staffid',
-            'is_superuser', 
-            'is_credit_officer', 
-            'is_branch_manager', 
-            'is_senior_manager', 
-            'is_agency_bank', 
+            'is_superuser',
+            'is_credit_officer',
+            'is_branch_manager',
+            'is_senior_manager',
+            'is_agency_bank',
             'is_active'
-            ]
+        ]
 
 
 class ShowAllUserSerializer(serializers.ModelSerializer):
-    
+
     class Meta:
         model = User
-        fields =  [
+        fields = [
             'id',
             'staffname',
-            'email', 
+            'email',
             'staffid',
-            'is_superuser', 
-            'is_credit_officer', 
-            'is_branch_manager', 
-            'is_senior_manager', 
-            'is_agency_bank', 
+            'is_superuser',
+            'is_credit_officer',
+            'is_branch_manager',
+            'is_senior_manager',
+            'is_agency_bank',
             'is_active'
-            ]
+        ]

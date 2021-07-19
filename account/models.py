@@ -8,7 +8,6 @@ from django.conf import settings
 from django.contrib.sessions.models import Session
 
 
-
 class UserManager(BaseUserManager):
     """Define a model manager for User model with no username field."""
 
@@ -41,7 +40,8 @@ class UserManager(BaseUserManager):
             raise ValueError('Superuser must have is_superuser=True.')
 
         return self._create_user(email, password, **extra_fields)
-    
+
+
 class User(AbstractBaseUser, PermissionsMixin):
     username = None
     email = models.EmailField(unique=True)
@@ -52,58 +52,61 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_senior_manager = models.BooleanField(default=False)
     is_agency_bank = models.BooleanField(default=False)
     is_staff = models.BooleanField(verbose_name='is_staff', default=True)
-    date_joined = models.DateTimeField(verbose_name='date_joined', auto_now_add=True)
+    date_joined = models.DateTimeField(
+        verbose_name='date_joined', auto_now_add=True)
     is_active = models.BooleanField(verbose_name='is_active', default=True)
-    objects =  UserManager()
+    objects = UserManager()
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ['staffname']
 
     class Meta:
         db_table = 'user'
-    
+
     def __str__(self):
         """Return a human readable representation of the model instance."""
         return "{}".format(self.email)
 
 
 class UserSession(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL,
+                             on_delete=models.CASCADE)
     session = models.OneToOneField(Session, on_delete=models.CASCADE)
 
     class Meta:
         db_table = 'user_session'
-    
+
     def __str__(self):
         """Return a human readable representation of the model instance."""
         return "{}".format(self.user)
-        
+
 
 class Otp(models.Model):
     email = models.EmailField(null=True)
     otp_code = models.TextField(null=True)
     dt_created = models.DateTimeField(auto_now=True)
-    
+
     class Meta:
         db_table = 'otp'
-        
+
     def __str__(self):
         """Return a human readable representation of the model instance."""
         return "{}".format(self.email)
-        
+
+
 class Groups(models.Model):
     group_id = models.CharField(max_length=100, null=True)
     group_name = models.TextField(null=True)
     active = models.BooleanField(default=False)
     date_created = models.DateField(auto_now=True)
-    
+
     class Meta:
         db_table = 'groups'
-    
+
     def __str__(self):
         """Return a human readable representation of the model instance."""
         return "{}".format(self.group_id)
-        
+
 
 class GroupMember(models.Model):
     group = models.ForeignKey(Groups, on_delete=models.CASCADE)
@@ -112,15 +115,15 @@ class GroupMember(models.Model):
     mobile_number = models.TextField(null=True)
     is_leader = models.BooleanField(null=True)
     date_added = models.DateField(auto_now=True)
-    
+
     class Meta:
         db_table = 'group_member'
-        
+
     def __str__(self):
         """Return a human readable representation of the model instance."""
         return "{}".format(self.group)
-        
-        
+
+
 class LoanApplication(models.Model):
     application_id = models.TextField(blank=True, null=True)
     app_type = models.TextField(null=True, blank=True)
@@ -159,22 +162,23 @@ class LoanApplication(models.Model):
     guarantor_office_address = models.TextField(blank=True, null=True)
     rec_from_group_1 = models.TextField(blank=True, null=True)
     rec_from_group_2 = models.TextField(blank=True, null=True)
-    credit_officer_approve = models.CharField(max_length=100, default="APPROVED")
+    credit_officer_approve = models.CharField(
+        max_length=100, default="APPROVED")
     credit_officer_name = models.TextField(blank=True, null=True)
-    branch_manager_approve = models.CharField(max_length=100, default="PENDING")
+    branch_manager_approve = models.CharField(
+        max_length=100, default="PENDING")
     branch_manager_name = models.TextField(blank=True, null=True)
     branch_manager_reason = models.TextField(blank=True, null=True)
     bm_date_action = models.DateField(blank=True, null=True)
-    senior_manager_approve = models.CharField(max_length=100, default="PENDING")
+    senior_manager_approve = models.CharField(
+        max_length=100, default="PENDING")
     senior_manager_name = models.TextField(blank=True, null=True)
     senior_manager_reason = models.TextField(blank=True, null=True)
     sm_date_action = models.DateField(blank=True, null=True)
-    
-    
-    
+
     class Meta:
         db_table = 'loan_application'
-        
+
     def __str__(self):
         """Return a human readable representation of the model instance."""
         return "{}".format(self.form_no)
