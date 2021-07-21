@@ -28,4 +28,8 @@ urlpatterns = [
     path('changeleader/<group_id>/<mobileNumber>', views.change_group_leader),
     path('admin_reset_password/<id>', views.admin_reset_password),
     path('oldloan/', views.oldCustomerBookLoan),
+    path('newloan/', views.newCustomerBookLoan),
+    path('all_loan/', views.allLoan),
+    path('approveloan/<appId>', views.approveloan),
+    path('repayloan/<appid>', views.repayloan),
 ]

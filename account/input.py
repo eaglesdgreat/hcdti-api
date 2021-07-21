@@ -11,6 +11,7 @@ class Input:
         phoneNo = request.data.get('phoneNo')
         residenceAddress = request.data.get('residenceAddress')
         permanentAddress = request.data.get('permanentAddress')
+        branch = request.data.get('branch')
         maritalStatus = request.data.get('maritalStatus')
         formalEdu = request.data.get('formalEdu')
         nextOfKin = request.data.get('nextOfKin')
@@ -48,6 +49,7 @@ class Input:
             "maritalStatus": maritalStatus,
             "formalEdu": formalEdu,
             "nextOfKin": nextOfKin,
+            "branch": branch,
             "phoneNextOfKin": phoneNextOfKin,
             "groupOfApp": groupOfApp,
             "dateOfMembership": dateOfMembership,

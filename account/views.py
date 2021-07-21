@@ -10,6 +10,7 @@ import random
 import string
 import uuid
 import math
+from django.db.models import Q
 from datetime import datetime
 from .serializers import *
 from django.shortcuts import get_object_or_404
@@ -494,6 +495,14 @@ def add_member_to_group(request):
         }
         return Response(data=data, status=status.HTTP_401_UNAUTHORIZED)
 
+    elif GroupMember.objects.filter(mobile_number=mobileNumber).exists():
+        data = {
+            "code": status.HTTP_401_UNAUTHORIZED,
+            "status": "fail",
+            "reason": "This Customer already belong to one HCDTI's group"
+        }
+        return Response(data=data, status=status.HTTP_401_UNAUTHORIZED)
+
     elif Groups.objects.filter(group_id=groupId).exists() == False:
         data = {
             "code": status.HTTP_401_UNAUTHORIZED,
@@ -945,6 +954,9 @@ def admin_reset_password(request, id):
             return Response(data=data, status=status.HTTP_401_UNAUTHORIZED)
 
 
+"""Create loan for existing customer"""
+
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def oldCustomerBookLoan(request):
@@ -960,3 +972,123 @@ def oldCustomerBookLoan(request):
         data = newInput.oldLoanInput(request)
         resp = new_fun.createLoanExistingCustomer(request, data)
         return resp
+
+
+"""Create Loan for new customer"""
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def newCustomerBookLoan(request):
+    if request.user.is_credit_officer == False:
+        data = {
+            "code": status.HTTP_401_UNAUTHORIZED,
+            "status": "fail",
+            "reason": "permission denied"
+        }
+        return Response(data=data, status=status.HTTP_401_UNAUTHORIZED)
+    else:
+        """Call the Input Fields"""
+        data = newInput.newLoanInput(request)
+        resp = new_fun.createLoanNewCustomer(request, data)
+        return resp
+
+
+"""Get all the loan application"""
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def allLoan(request):
+    while request.user.is_credit_officer == True or request.user.is_branch_manager == True:
+        snipet = LoanApplication.objects.filter(Q(credit_officer_approve='APPROVED', branch_manager_approve='PENDING') | Q(
+            credit_officer_approve='APPROVED', branch_manager_approve='APPROVED') | Q(credit_officer_approve='APPROVED', branch_manager_approve='DECLINED'))
+        datas = ShowAllLoanApplication(instance=snipet, many=True)
+        resp = {
+            "code": status.HTTP_200_OK,
+            "status": "success",
+            "result": datas.data
+        }
+        return Response(data=resp, status=status.HTTP_200_OK)
+
+    else:
+        if request.user.is_senior_manager == True:
+            snipet = LoanApplication.objects.filter(Q(credit_officer_approve='APPROVED', branch_manager_approve='APPROVED') | Q(
+                senior_manager_approve='APPROVED') | Q(senior_manager_approve='DECLINED'))
+            datas = ShowAllLoanApplication(
+                instance=snipet, many=True)
+            resp = {
+                "code": status.HTTP_200_OK,
+                "status": "success",
+                "result": datas.data
+            }
+            return Response(data=resp, status=status.HTTP_200_OK)
+
+        elif request.user.is_agency_bank == True:
+            snipet = LoanApplication.objects.filter(
+                Q(credit_officer_approve='APPROVED', branch_manager_approve='APPROVED', senior_manager_approve='APPROVED'))
+            datas = ShowAllLoanApplication(
+                instance=snipet, many=True)
+            resp = {
+                "code": status.HTTP_200_OK,
+                "status": "success",
+                "result": datas.data
+            }
+            return Response(data=resp, status=status.HTTP_200_OK)
+
+        else:
+            snipet = LoanApplication.objects.filter()
+            datas = ShowAllLoanApplication(
+                instance=snipet, many=True)
+            resp = {
+                "code": status.HTTP_200_OK,
+                "status": "success",
+                "result": datas.data
+            }
+            return Response(data=resp, status=status.HTTP_200_OK)
+
+
+"""Approve Loan"""
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def approveloan(request, appId):
+    if request.user.is_superuser == True:
+        data = {
+            "code": status.HTTP_401_UNAUTHORIZED,
+            "status": "fail",
+            "reason": "permission denied"
+        }
+        return Response(data=data, status=status.HTTP_401_UNAUTHORIZED)
+    else:
+        resp = new_fun.approve_loan(request, appId)
+        return resp
+
+
+"""Loan Repayment"""
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def repayloan(request, appid):
+    amount = request.data.get('amount')
+    while request.user.is_superuser == True or request.user.is_agency_bank == True:
+        if amount == "":
+            data = {
+                "code": status.HTTP_401_UNAUTHORIZED,
+                "status": "fail",
+                "reason": "Amount field can't be empty"
+            }
+            return Response(data=data, status=status.HTTP_401_UNAUTHORIZED)
+
+        else:
+            resp = new_fun.loanRepayment(appid, amount)
+            return resp
+    else:
+        data = {
+            "code": status.HTTP_401_UNAUTHORIZED,
+            "status": "fail",
+            "reason": "permission denied"
+        }
+        return Response(data=data, status=status.HTTP_401_UNAUTHORIZED)

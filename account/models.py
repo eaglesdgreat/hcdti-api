@@ -175,6 +175,11 @@ class LoanApplication(models.Model):
     senior_manager_name = models.TextField(blank=True, null=True)
     senior_manager_reason = models.TextField(blank=True, null=True)
     sm_date_action = models.DateField(blank=True, null=True)
+    agency_bank_approve = models.CharField(
+        max_length=100, default="PENDING")
+    agency_bank_name = models.TextField(blank=True, null=True)
+    ab_date_action = models.DateField(blank=True, null=True)
+    repaid = models.CharField(max_length=100, default="PENDING")
 
     class Meta:
         db_table = 'loan_application'
@@ -182,3 +187,26 @@ class LoanApplication(models.Model):
     def __str__(self):
         """Return a human readable representation of the model instance."""
         return "{}".format(self.form_no)
+
+
+class ApprovedLoan(models.Model):
+    loan = models.ForeignKey(
+        LoanApplication, related_name='approve', on_delete=models.CASCADE)
+    application_id = models.CharField(max_length=100, blank=True, null=True)
+    form_no = models.CharField(max_length=100, blank=True, null=True)
+    customer_name = models.TextField(blank=True, null=True)
+    loan_amt = models.FloatField(blank=True, null=True)
+    customer_bank = models.TextField(blank=True, null=True)
+    customer_acct_no = models.TextField(blank=True, null=True)
+    disbursed = models.CharField(max_length=100, default="PENDING")
+    date_disbursed = models.DateTimeField(blank=True, null=True)
+    repaid_amt = models.FloatField(blank=True, null=True)
+    repaid = models.CharField(max_length=100, default="PENDING")
+    date_repaid = models.DateTimeField(blank=True, null=True)
+
+    class Meta:
+        db_table = 'approved_loan'
+
+    def __str__(self):
+        """Return a human readable representation of the model instance."""
+        return "{}".format(self.application_id)
