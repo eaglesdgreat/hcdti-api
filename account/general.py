@@ -618,7 +618,14 @@ class General:
     def loanRepayment(self, appid, amount):
         try:
             loan = get_object_or_404(ApprovedLoan, application_id=appid)
-            if loan.repaid_amt == 0:
+            if loan.disbursed == 'PENDING':
+                datas = {
+                    "code": status.HTTP_401_UNAUTHORIZED,
+                    "status": "fail",
+                    "reason": "Loan can't be repaid because the loan has not been been disbursed"
+                }
+                return Response(data=datas, status=status.HTTP_401_UNAUTHORIZED)
+            elif loan.repaid_amt == 0:
                 datas = {
                     "code": status.HTTP_401_UNAUTHORIZED,
                     "status": "fail",
