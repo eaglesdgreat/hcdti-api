@@ -32,4 +32,5 @@ urlpatterns = [
     path('all_loan/', views.allLoan),
     path('approveloan/<appId>', views.approveloan),
     path('repayloan/<appid>', views.repayloan),
+    path('singleloan/<str:appid>', views.getSingleLoan),
 ]

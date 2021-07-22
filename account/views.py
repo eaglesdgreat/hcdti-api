@@ -1092,3 +1092,26 @@ def repayloan(request, appid):
             "reason": "permission denied"
         }
         return Response(data=data, status=status.HTTP_401_UNAUTHORIZED)
+
+
+"""Get single Loan by ID"""
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def getSingleLoan(request, appid):
+    try:
+        snippet = LoanApplication.objects.get(application_id=appid)
+        
+        datas = ShowAllLoanApplication(instance=snippet)
+        resp = {
+            "code": status.HTTP_200_OK,
+            "status": "success",
+            "result": datas.data
+        }
+        return Response(data=resp, status=status.HTTP_200_OK)
+    except:
+        data = {
+            "code": status.HTTP_401_UNAUTHORIZED,
+            "status": "fail",
+            "reason": "Invalid Application ID"
+        }
+        return Response(data=data, status=status.HTTP_401_UNAUTHORIZED)
