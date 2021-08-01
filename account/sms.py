@@ -4,7 +4,7 @@ from decouple import config
 
 urls = config('SMS_BASE_URL')
 api_token = config('SMS_TOKEN')
-mfrom = 'JUST USSD'
+mfrom = 'HCDTI'
 
 """
 Class that Handle everything 

@@ -84,31 +84,12 @@ class Input:
         state = request.data.get('state')
         memberNo = request.data.get('memberNo')
         branch = request.data.get('branch')
-        nameOfFather = request.data.get('nameOfFather')
-        residenceAddress = request.data.get('residenceAddress')
-        permanentAddress = request.data.get('permanentAddress')
-        maritalStatus = request.data.get('maritalStatus')
-        formalEdu = request.data.get('formalEdu')
-        nextOfKin = request.data.get('nextOfKin')
-        phoneNextOfKin = request.data.get('phoneNextOfKin')
         groupOfApp = request.data.get('groupOfApp')
-        bank = request.data.get('bank')
-        accountNo = request.data.get('accountNo')
-        typeOfBusiness = request.data.get('typeOfBusiness')
-        businessDuration = request.data.get('businessDuration')
-        amtSavingsInPassbook = request.data.get('amtSavingsInPassbook')
-        busnessAddress = request.data.get('busnessAddress')
-        familyOnHcdtiGroup = request.data.get('familyOnHcdtiGroup')
         lastLoanRecieved = request.data.get('lastLoanRecieved')
         dateLastLoanRepaid = request.data.get('dateLastLoanRepaid')
         loanAppliedFor = request.data.get('loanAppliedFor')
-        indeptedToMfbMfi = request.data.get('indeptedToMfbMfi')
         outsanding = request.data.get('outsanding')
-        nameOfGuarantor = request.data.get('nameOfGuarantor')
-        guarantorRelationship = request.data.get('guarantorRelationship')
         guarantorOccupation = request.data.get('guarantorOccupation')
-        guarantorHomeAddress = request.data.get('guarantorHomeAddress')
-        guarantorOfficeAddress = request.data.get('guarantorOfficeAddress')
         recFromGroup1 = request.data.get('recFromGroup1')
         recFromGroup2 = request.data.get('recFromGroup2')
 
@@ -118,31 +99,12 @@ class Input:
             "state": state,
             "memberNo": memberNo,
             "branch": branch,
-            "nameOfFather": nameOfFather,
-            "residenceAddress": residenceAddress,
-            "permanentAddress": permanentAddress,
-            "maritalStatus": maritalStatus,
-            "formalEdu": formalEdu,
-            "nextOfKin": nextOfKin,
             "groupOfApp": groupOfApp,
-            "bank": bank,
-            "accountNo": accountNo,
-            "typeOfBusiness": typeOfBusiness,
-            "businessDuration": businessDuration,
-            "phoneNextOfKin": phoneNextOfKin,
-            "amtSavingsInPassbook": amtSavingsInPassbook,
-            "busnessAddress": busnessAddress,
-            "familyOnHcdtiGroup": familyOnHcdtiGroup,
             "lastLoanRecieved": lastLoanRecieved,
             "dateLastLoanRepaid": dateLastLoanRepaid,
             "loanAppliedFor": loanAppliedFor,
-            "indeptedToMfbMfi": indeptedToMfbMfi,
             "outsanding": outsanding,
-            "nameOfGuarantor": nameOfGuarantor,
-            "guarantorRelationship": guarantorRelationship,
             "guarantorOccupation": guarantorOccupation,
-            "guarantorHomeAddress": guarantorHomeAddress,
-            "guarantorOfficeAddress": guarantorOfficeAddress,
             "recFromGroup1": recFromGroup1,
             "recFromGroup2": recFromGroup2
         }

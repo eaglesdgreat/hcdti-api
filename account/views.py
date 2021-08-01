@@ -438,6 +438,7 @@ def get_all_group(request):
             datas['groupName'] = i.group_name
             datas['dateCreated'] = i.date_created
             datas['totalMember'] = total_member
+            datas['leaderKey'] = grp_m.id
             datas['leaderName'] = grp_m.member_name
             datas['mobileNumber'] = grp_m.mobile_number
             datas['active'] = i.active
@@ -669,12 +670,14 @@ def get_single_group(request, id):
 
     else:
         grp = get_object_or_404(Groups, id=id)
+        grm = get_object_or_404(GroupMember, group_id=id, is_leader=True)
         data = {
             "code": status.HTTP_200_OK,
             "status": "success",
             "result": {
                 "groupId": grp.group_id,
                 "groupName": grp.group_name,
+                "groupLeader": grm.member_name,
                 "dateCreated": grp.date_created
             }
         }
@@ -737,12 +740,13 @@ def get_group_member(request, group_id):
         return Response(data=data, status=status.HTTP_401_UNAUTHORIZED)
     else:
         grp = get_object_or_404(Groups, group_id=group_id)
-
+        grm = get_object_or_404(GroupMember, group_id=grp.id, is_leader=True)
         members = []
         allmember = GroupMember.objects.filter(
             groups_id=group_id, group_id=grp.id)
         for i in allmember:
             datas = {}
+            datas['id'] = i.id
             datas['memberName'] = i.member_name
             datas['mobileNumber'] = i.mobile_number
             datas['isLeader'] = i.is_leader
@@ -757,10 +761,27 @@ def get_group_member(request, group_id):
             "status": "success",
             "groupName": grp.group_name,
             "groupId": grp.group_id,
+            "groupActive": grp.active,
+            "groupLeader": grm.member_name,
             "result": members
         }
 
         return Response(data=data, status=status.HTTP_200_OK)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_member_info(request, id):
+    if request.user.is_credit_officer == False and request.user.is_superuser is not True:
+        data = {
+            "code": status.HTTP_401_UNAUTHORIZED,
+            "status": "fail",
+            "reason": "Permission Denied. Only Super Admin and Credit Officer can perform group management"
+        }
+        return Response(data=data, status=status.HTTP_401_UNAUTHORIZED)
+    else:
+        resp = new_fun.get_single_user_info(id)
+        return(resp)
 
 
 """Update Customer Group Membership"""
@@ -770,7 +791,26 @@ def get_group_member(request, group_id):
 @permission_classes([IsAuthenticated])
 def update_member(request, id):
     memberName = request.data.get("memberName")
-    mobileNumber = request.data.get("mobileNumber")
+    nameOfHusband = request.data.get("nameOfHusband")
+    nextOfKin = request.data.get("nextOfKin")
+    nextOfKinMobile = request.data.get("nextOfKinMobile")
+    custEduLevel = request.data.get("custEduLevel")
+    residentAddress = request.data.get("residentAddress")
+    busAddress = request.data.get("busAddress")
+    maritalStatus = request.data.get("maritalStatus")
+    typeOfBus = request.data.get("typeOfBusiness")
+    durationOfBus = request.data.get("durationOfBusiness")
+    familyOnHcdtiGroup = request.data.get("familyOnHcdtiGroup")
+    savingsInPassbook = request.data.get("savingsInPassbook")
+    bank = request.data.get("bank")
+    accountNo = request.data.get("accountNo")
+    memberOwningMfi = request.data.get("memberOwningMfi")
+    mfiName = request.data.get("mfiName")
+    guarantor = request.data.get("guarantor")
+    guarantorRel = request.data.get("guarantorRelationship")
+    guarantorAddress = request.data.get("guarantorAddress")
+    guarantorOfficeAddress = request.data.get("guarantorOfficeAddress")
+    groupRecommendation = request.data.get("groupRecommendation")
 
     if request.user.is_credit_officer == False and request.user.is_superuser is not True:
         data = {
@@ -779,13 +819,13 @@ def update_member(request, id):
             "reason": "Permission Denied. Only Super Admin and Credit Officer can perform group management"
         }
         return Response(data=data, status=status.HTTP_401_UNAUTHORIZED)
-    elif GroupMember.objects.filter(id=id, mobile_number=mobileNumber).exists():
-        data = {
-            "code": status.HTTP_401_UNAUTHORIZED,
-            "status": "fail",
-            "reason": "Mobile Number already Exist in that group"
-        }
-        return Response(data=data, status=status.HTTP_401_UNAUTHORIZED)
+    # elif GroupMember.objects.filter(id=id, mobile_number=mobileNumber).exists():
+    #     data = {
+    #         "code": status.HTTP_401_UNAUTHORIZED,
+    #         "status": "fail",
+    #         "reason": "Mobile Number already Exist in that group"
+    #     }
+    #     return Response(data=data, status=status.HTTP_401_UNAUTHORIZED)
     elif memberName == "":
         data = {
             "code": status.HTTP_401_UNAUTHORIZED,
@@ -793,14 +833,21 @@ def update_member(request, id):
             "reason": "Member Name can not be empty"
         }
         return Response(data=data, status=status.HTTP_401_UNAUTHORIZED)
-    elif mobileNumber == "":
+    elif type(familyOnHcdtiGroup) != bool and type(memberOwningMfi) != bool:
         data = {
             "code": status.HTTP_401_UNAUTHORIZED,
             "status": "fail",
-            "reason": "Mobile Number can not be empty"
+            "reason": "Family on HCDTI field and Member Owning MFI's must be Boolean (True/False)"
         }
         return Response(data=data, status=status.HTTP_401_UNAUTHORIZED)
-
+    elif memberOwningMfi == True and mfiName == "":
+        data = {
+            "code": status.HTTP_401_UNAUTHORIZED,
+            "status": "fail",
+            "reason": "Please Kindly Type the name of MFIs You are owning"
+        }
+        return Response(data=data, status=status.HTTP_401_UNAUTHORIZED)
+    
     elif GroupMember.objects.filter(id=id).exists() == False:
         data = {
             "code": status.HTTP_401_UNAUTHORIZED,
@@ -811,7 +858,15 @@ def update_member(request, id):
 
     else:
         upd_m = GroupMember.objects.filter(id=id)
-        upd_m.update(member_name=memberName, mobile_number=mobileNumber)
+        ginfo = GroupMemberInfo.objects.filter(group_member=id)
+        upd_m.update(member_name=memberName)
+        ginfo.update(name_of_husband=nameOfHusband, next_of_kin=nextOfKin, next_of_kin_mobile=nextOfKinMobile, cust_edu_level=custEduLevel,
+                     resident_addr=residentAddress, bus_addr=busAddress, marital_status=maritalStatus, type_of_bus=typeOfBus, 
+                     duration_of_bus=durationOfBus, family_on_hcdti_group=familyOnHcdtiGroup, savings_in_passbook=savingsInPassbook,
+                     bank=bank, account_no=accountNo, member_owning_mfi=memberOwningMfi, mfi_name=mfiName, guarantor=guarantor, 
+                     guarantor_rel=guarantorRel, guarantor_addr=guarantorAddress, guarantor_office_addr=guarantorOfficeAddress,
+                     group_recomm=groupRecommendation)
+        
         data = {
             "code": status.HTTP_200_OK,
             "status": "successfull",
@@ -820,9 +875,47 @@ def update_member(request, id):
         return Response(data=data, status=status.HTTP_200_OK)
 
 
+"""Activate/Deactivate group"""
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def groupAction(request, groupid):
+    if request.user.is_credit_officer == False and request.user.is_superuser is not True:
+        data = {
+            "code": status.HTTP_401_UNAUTHORIZED,
+            "status": "fail",
+            "reason": "Permission Denied. Only Super Admin and Credit Officer can perform group management"
+        }
+        return Response(data=data, status=status.HTTP_401_UNAUTHORIZED)
+    else:
+        try:
+            grp = get_object_or_404(Groups, group_id=groupid)
+            instance = Groups.objects.filter(group_id=groupid)
+            if grp.active == True:
+                instance.update(active=False)
+                data = {
+                    "code": status.HTTP_200_OK,
+                    "status": "successfull",
+                    "reason": "Group Deactivated"
+                }
+                return Response(data=data, status=status.HTTP_200_OK)
+            else:
+                instance.update(active=True)
+                data = {
+                    "code": status.HTTP_200_OK,
+                    "status": "successfull",
+                    "reason": "Group Activated"
+                }
+                return Response(data=data, status=status.HTTP_200_OK)
+        except:
+            data = {
+                "code": status.HTTP_401_UNAUTHORIZED,
+                "status": "fail",
+                "reason": "Invalid Group ID"
+            }
+            return Response(data=data, status=status.HTTP_401_UNAUTHORIZED)
+
+
 """Get Group Member by ID"""
-
-
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_single_member(request, id):
@@ -848,6 +941,7 @@ def get_single_member(request, id):
             "code": status.HTTP_200_OK,
             "status": "success",
             "result": {
+                "memberId": mem.id,
                 "groupId": mem.groups_id,
                 "groupName": grp.group_name,
                 "memberName": mem.member_name,
@@ -1115,3 +1209,43 @@ def getSingleLoan(request, appid):
             "reason": "Invalid Application ID"
         }
         return Response(data=data, status=status.HTTP_401_UNAUTHORIZED)
+    
+"""Remove/Delete Loan"""
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def removeloan(request, appid):
+    try:
+        loans = get_object_or_404(LoanApplication, application_id=appid)
+        instance = LoanApplication.objects.filter(application_id=appid)
+        if request.user.is_credit_officer == False and request.user.is_superuser is not True:
+            data = {
+                "code": status.HTTP_401_UNAUTHORIZED,
+                "status": "fail",
+                "reason": "Permission Denied. Only Super Admin and Credit Officer Remove/Delete Loan"
+            }
+            return Response(data=data, status=status.HTTP_401_UNAUTHORIZED)
+        elif loans.senior_manager_approve == "APPROVED" or loans.agency_bank_approve == "APPROVED":
+            data = {
+                "code": status.HTTP_401_UNAUTHORIZED,
+                "status": "fail",
+                "reason": "Loan Application can't be removed because it has been approve by Senior Manager or Agency Banking"
+            }
+            return Response(data=data, status=status.HTTP_401_UNAUTHORIZED)
+        
+        else:
+            instance.delete()
+            data = {
+                "code": status.HTTP_200_OK,
+                "status": "successfull",
+                "reason": "Loan Deleted"
+            }
+            return Response(data=data, status=status.HTTP_200_OK)
+            
+    except:
+        data = {
+            "code": status.HTTP_401_UNAUTHORIZED,
+            "status": "fail",
+            "reason": "Invalid Application ID"
+        }
+        return Response(data=data, status=status.HTTP_401_UNAUTHORIZED)
+    

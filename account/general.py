@@ -1,6 +1,7 @@
 from django.shortcuts import get_object_or_404
 from .models import *
 import random
+from .serializers import *
 import string
 from datetime import datetime
 from django.utils import timezone
@@ -252,7 +253,9 @@ class General:
                                  member_name=member_name,
                                  mobile_number=mobile_number,
                                  is_leader=is_leader)
+            grpInfo = GroupMemberInfo(group_member=cr_mem)
             cr_mem.save()
+            grpInfo.save()
             Groups.objects.filter(group_id=group_id).update(active=True)
         else:
             cr_mem = GroupMember(group_id=grp.id,
@@ -260,7 +263,10 @@ class General:
                                  member_name=member_name,
                                  mobile_number=mobile_number,
                                  is_leader=is_leader)
+            # print()
+            grpInfo = GroupMemberInfo(group_member=cr_mem)
             cr_mem.save()
+            grpInfo.save()
         pass
 
     """Create Loan for Existing Customer"""
@@ -274,31 +280,12 @@ class General:
         state = data["state"]
         memberNo = data["memberNo"]
         branch = data["branch"]
-        nameOfFather = data["nameOfFather"]
-        residenceAddress = data["residenceAddress"]
-        permanentAddress = data["permanentAddress"]
-        maritalStatus = data["maritalStatus"]
-        formalEdu = data["formalEdu"]
-        nextOfKin = data["nextOfKin"]
-        phoneNextOfKin = data["phoneNextOfKin"]
         groupOfApp = data["groupOfApp"]
         lastLoanRecieved = data["lastLoanRecieved"]
         dateLastLoanRepaid = data["dateLastLoanRepaid"]
         loanAppliedFor = data["loanAppliedFor"]
-        indeptedToMfbMfi = data["indeptedToMfbMfi"]
         outsanding = data["outsanding"]
-        bank = data["bank"]
-        accountNo = data["accountNo"]
-        typeOfBusiness = data["typeOfBusiness"]
-        businessDuration = data["businessDuration"]
-        amtSavingsInPassbook = data["amtSavingsInPassbook"]
-        busnessAddress = data["busnessAddress"]
-        familyOnHcdtiGroup = data["familyOnHcdtiGroup"]
-        nameOfGuarantor = data["nameOfGuarantor"]
-        guarantorRelationship = data["guarantorRelationship"]
         guarantorOccupation = data["guarantorOccupation"]
-        guarantorHomeAddress = data["guarantorHomeAddress"]
-        guarantorOfficeAddress = data["guarantorOfficeAddress"]
         recFromGroup1 = data["recFromGroup1"]
         recFromGroup2 = data["recFromGroup2"]
         creditOfficerName = request.user.staffname
@@ -306,10 +293,19 @@ class General:
         newAmt = float(loanAppliedFor)
         try:
             gpm = get_object_or_404(GroupMember, mobile_number=memberNo)
+            ginfo = get_object_or_404(GroupMemberInfo, group_member=gpm.id)
             while newAmt >= min_loan and newAmt <= max_loan:
                 gp = get_object_or_404(Groups, group_id=gpm.groups_id)
                 while gp.active == True and GroupMember.objects.filter(groups_id=gp.group_id).count() >= 5:
-                    if LoanApplication.objects.filter(member_no=memberNo).exists():
+                    if ginfo.active == False:
+                        datas = {
+                            "code": status.HTTP_401_UNAUTHORIZED,
+                            "status": "fail",
+                            "reason": "Customer can't enroll for loan because customer information is not complete. Kindly Complete and Come back"
+                        }
+                        return Response(data=datas, status=status.HTTP_401_UNAUTHORIZED)
+                    
+                    elif LoanApplication.objects.filter(member_no=memberNo).exists():
                         datas = {
                             "code": status.HTTP_401_UNAUTHORIZED,
                             "status": "fail",
@@ -321,21 +317,21 @@ class General:
                             application_id=loanId, app_type=app_type,
                             form_no=formNo, state=state, member_no=memberNo,
                             branch=branch, fullname=gpm.member_name,
-                            name_of_father=nameOfFather, phoneno=memberNo,
-                            residence_address=residenceAddress,
-                            permanent_address=permanentAddress,
-                            marital_status=maritalStatus, formal_edu=formalEdu,
-                            next_of_kin=nextOfKin, phone_next_of_kin=phoneNextOfKin,
+                            name_of_father=ginfo.name_of_husband, phoneno=memberNo,
+                            residence_address=ginfo.resident_addr,
+                            permanent_address=ginfo.resident_addr,
+                            marital_status=ginfo.marital_status, formal_edu=ginfo.cust_edu_level,
+                            next_of_kin=ginfo.next_of_kin, phone_next_of_kin=ginfo.next_of_kin_mobile,
                             group_of_app=groupOfApp, date_of_membership=gpm.date_added,
-                            type_of_business=typeOfBusiness, business_duration=businessDuration,
-                            busness_address=busnessAddress, family_on_hcdti_group=familyOnHcdtiGroup,
-                            amt_savings_in_passbook=amtSavingsInPassbook, bank=bank,
-                            account_no=accountNo, last_loan_recieved=lastLoanRecieved,
+                            type_of_business=ginfo.type_of_bus, business_duration=ginfo.duration_of_bus,
+                            busness_address=ginfo.bus_addr, family_on_hcdti_group=ginfo.family_on_hcdti_group,
+                            amt_savings_in_passbook=ginfo.savings_in_passbook, bank=ginfo.bank,
+                            account_no=ginfo.account_no, last_loan_recieved=lastLoanRecieved,
                             date_last_loan_repaid=dateLastLoanRepaid, loan_applied_for=loanAppliedFor,
-                            indepted_to_mfb_mfi=indeptedToMfbMfi, outsanding=outsanding,
-                            name_of_guarantor=nameOfGuarantor, guarantor_relationship=guarantorRelationship,
-                            guarantor_occupation=guarantorOccupation, guarantor_home_address=guarantorHomeAddress,
-                            guarantor_office_address=guarantorOfficeAddress, rec_from_group_1=recFromGroup1,
+                            indepted_to_mfb_mfi=ginfo.member_owning_mfi, outsanding=outsanding,
+                            name_of_guarantor=ginfo.guarantor, guarantor_relationship=ginfo.guarantor_rel,
+                            guarantor_occupation=guarantorOccupation, guarantor_home_address=ginfo.guarantor_addr,
+                            guarantor_office_address=ginfo.guarantor_office_addr, rec_from_group_1=recFromGroup1,
                             rec_from_group_2=recFromGroup2, credit_officer_name=creditOfficerName)
                         createLoan.save()
                         ## Send SMS Notification to the Customer ##
@@ -677,3 +673,63 @@ class General:
                 "reason": "Invalid Loan ID"
             }
             return Response(data=datas, status=status.HTTP_401_UNAUTHORIZED)
+    
+    
+    """ Get Single customer Information """
+    def get_single_user_info(self, id):
+        try:
+            mb = get_object_or_404(GroupMember, id=id)
+            gb = get_object_or_404(Groups, group_id=mb.groups_id)
+            gbInfo = get_object_or_404(GroupMemberInfo, group_member=id)
+            loan = LoanApplication.objects.filter(member_no=mb.mobile_number)
+            datas = ShowAllLoanApplication(instance=loan, many=True)
+            member = {
+                "memberName": mb.member_name,
+                "groupName": gb.group_name,
+                "mobileNumber": mb.mobile_number
+            }
+            personal = {
+                "nameOfHusband": gbInfo.name_of_husband,
+                "nextOfKin": gbInfo.next_of_kin,
+                "nextOfKinMobile": gbInfo.next_of_kin_mobile,
+                "custEducation": gbInfo.cust_edu_level,
+                "residentialAddress": gbInfo.resident_addr,
+                "busAddress": gbInfo.bus_addr,
+                "maritalStatus": gbInfo.marital_status,
+                "dateJoin": gbInfo.date_added
+            }
+            business = {
+                "typeOfBusiness": gbInfo.type_of_bus,
+                "durationOfBusiness": gbInfo.duration_of_bus,
+                "businessAddress": gbInfo.bus_addr,
+                "familyInHcdti": gbInfo.family_on_hcdti_group,
+                "amountOfPassbook": gbInfo.savings_in_passbook,
+                "bank": gbInfo.bank,
+                "accountNo": gbInfo.account_no,
+                "owningMFI": gbInfo.member_owning_mfi,
+                "mfiName": gbInfo.mfi_name
+            }
+        
+            guarantor = {
+                "nameOfGuarantor": gbInfo.guarantor,
+                "guarantorRelationship": gbInfo.guarantor_rel,
+                "guarantorHomeAddress": gbInfo.guarantor_addr,
+                "guarantorOfficeAddress": gbInfo.guarantor_office_addr,
+                "recommendation": gbInfo.group_recomm
+            }
+            datas = {
+                "memberInfo": member,
+                "personal": personal,
+                "businessInfo": business,
+                "loanHistory": datas.data,
+                "guarantor": guarantor
+            }
+            return Response(data=datas, status=status.HTTP_200_OK)
+
+        except:
+            datas = {
+                "code": status.HTTP_401_UNAUTHORIZED,
+                "status": "fail",
+                "reason": "Invalid ID"
+            }
+            return Response(data=datas, status=status.HTTP_401_UNAUTHORIZED) 

@@ -122,6 +122,40 @@ class GroupMember(models.Model):
     def __str__(self):
         """Return a human readable representation of the model instance."""
         return "{}".format(self.group)
+    
+
+class GroupMemberInfo(models.Model):
+    group_member = models.OneToOneField(GroupMember, on_delete=models.CASCADE)
+    name_of_husband = models.TextField(blank=True, null=True)
+    next_of_kin = models.TextField(blank=True, null=True)
+    next_of_kin_mobile = models.TextField(blank=True, null=True)
+    cust_edu_level = models.TextField(blank=True, null=True)
+    resident_addr = models.TextField(blank=True, null=True)
+    bus_addr = models.TextField(blank=True, null=True)
+    marital_status = models.TextField(blank=True, null=True)
+    date_added = models.DateField(auto_now=True)
+    type_of_bus = models.TextField(blank=True, null=True)
+    duration_of_bus = models.TextField(blank=True, null=True)
+    family_on_hcdti_group = models.BooleanField(blank=True, null=True)
+    savings_in_passbook = models.TextField(blank=True, null=True)
+    bank = models.TextField(blank=True, null=True)
+    account_no = models.TextField(blank=True, null=True)
+    member_owning_mfi = models.BooleanField(blank=True, null=True)
+    mfi_name = models.TextField(blank=True, null=True)
+    guarantor = models.TextField(blank=True, null=True)
+    guarantor_rel = models.TextField(blank=True, null=True)
+    guarantor_addr = models.TextField(blank=True, null=True)
+    guarantor_office_addr = models.TextField(blank=True, null=True)
+    group_recomm = models.TextField(blank=True, null=True)
+    active = models.BooleanField(default=False)
+    
+    
+    class Meta:
+        db_table = 'group_member_info'
+    
+    def __str__(self):
+        """Return a human readable representation of the model instance."""
+        return "{}".format(self.group_member)
 
 
 class LoanApplication(models.Model):

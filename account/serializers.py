@@ -57,7 +57,7 @@ class ShowAllLoanApplication(serializers.ModelSerializer):
     class Meta:
         model = LoanApplication
         fields = [
-            'application_id', 'app_type', 'form_no', 'state', 'member_no', 'branch', 'date_of_app',
+            'id','application_id', 'app_type', 'form_no', 'state', 'member_no', 'branch', 'date_of_app',
             'fullname', 'name_of_father', 'phoneno', 'residence_address', 'permanent_address',
             'marital_status', 'formal_edu', 'next_of_kin', 'phone_next_of_kin', 'group_of_app',
             'date_of_membership', 'type_of_business', 'business_duration', 'busness_address',
