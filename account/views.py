@@ -450,8 +450,8 @@ def get_all_group(request):
             datas['dateCreated'] = i.date_created
             datas['totalMember'] = total_member
             datas['active'] = i.active
-            # datas['leaderName'] = grp_m.member_name
-            # datas['mobileNumber'] = grp_m.mobile_number
+            datas['leaderName'] = None
+            datas['mobileNumber'] = None
         all_groups.append(datas)
 
     """Paginate the Response"""
