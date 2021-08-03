@@ -678,6 +678,7 @@ def get_single_group(request, id):
                 "result": {
                     "groupId": grp.group_id,
                     "groupName": grp.group_name,
+                    "active": grp.active,
                     "groupLeader": grm.member_name,
                     "dateCreated": grp.date_created
                 }
@@ -690,6 +691,7 @@ def get_single_group(request, id):
                 "result": {
                     "groupId": grp.group_id,
                     "groupName": grp.group_name,
+                    "active": grp.active,
                     "groupLeader": None,
                     "dateCreated": grp.date_created
                 }
