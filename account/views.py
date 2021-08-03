@@ -669,19 +669,32 @@ def get_single_group(request, id):
         return Response(data=data, status=status.HTTP_401_UNAUTHORIZED)
 
     else:
-        grp = get_object_or_404(Groups, id=id)
-        grm = get_object_or_404(GroupMember, group_id=id, is_leader=True)
-        data = {
-            "code": status.HTTP_200_OK,
-            "status": "success",
-            "result": {
-                "groupId": grp.group_id,
-                "groupName": grp.group_name,
-                "groupLeader": grm.member_name,
-                "dateCreated": grp.date_created
+        try:
+            grp = get_object_or_404(Groups, id=id)
+            grm = get_object_or_404(GroupMember, group_id=id, is_leader=True)
+            data = {
+                "code": status.HTTP_200_OK,
+                "status": "success",
+                "result": {
+                    "groupId": grp.group_id,
+                    "groupName": grp.group_name,
+                    "groupLeader": grm.member_name,
+                    "dateCreated": grp.date_created
+                }
             }
-        }
-        return Response(data=data, status=status.HTTP_200_OK)
+            return Response(data=data, status=status.HTTP_200_OK)
+        except:
+            data = {
+                "code": status.HTTP_200_OK,
+                "status": "success",
+                "result": {
+                    "groupId": grp.group_id,
+                    "groupName": grp.group_name,
+                    "groupLeader": None,
+                    "dateCreated": grp.date_created
+                }
+            }
+            return Response(data=data, status=status.HTTP_200_OK)
 
 
 """Remove Member from the Group"""
