@@ -755,7 +755,6 @@ def get_group_member(request, group_id):
         return Response(data=data, status=status.HTTP_401_UNAUTHORIZED)
     else:
         grp = get_object_or_404(Groups, group_id=group_id)
-        grm = get_object_or_404(GroupMember, group_id=grp.id, is_leader=True)
         members = []
         allmember = GroupMember.objects.filter(
             groups_id=group_id, group_id=grp.id)
@@ -771,17 +770,31 @@ def get_group_member(request, group_id):
         # paginator = PageNumberPagination()
         # paginator.page_size = 5
         # result_page = paginator.paginate_queryset(members, request)
-        data = {
-            "code": status.HTTP_200_OK,
-            "status": "success",
-            "groupName": grp.group_name,
-            "groupId": grp.group_id,
-            "groupActive": grp.active,
-            "groupLeader": grm.member_name,
-            "result": members
-        }
+        try:
+            grm = get_object_or_404(GroupMember, group_id=grp.id, is_leader=True)
+            data = {
+                "code": status.HTTP_200_OK,
+                "status": "success",
+                "groupName": grp.group_name,
+                "groupId": grp.group_id,
+                "groupActive": grp.active,
+                "groupLeader": grm.member_name,
+                "result": members
+            }
 
-        return Response(data=data, status=status.HTTP_200_OK)
+            return Response(data=data, status=status.HTTP_200_OK)
+        except:
+            data = {
+                "code": status.HTTP_200_OK,
+                "status": "success",
+                "groupName": grp.group_name,
+                "groupId": grp.group_id,
+                "groupActive": grp.active,
+                "groupLeader": None,
+                "result": members
+            }
+
+            return Response(data=data, status=status.HTTP_200_OK)
 
 
 @api_view(['GET'])
