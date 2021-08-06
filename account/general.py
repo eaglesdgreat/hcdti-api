@@ -23,6 +23,56 @@ now = (datetime.strftime(base_date_time, "%Y-%m-%d"))
 
 tnow = (datetime.strftime(base_date_time, "%Y-%m-%d %H:%M"))
 
+
+def add_member_group_new(group_id, member_name, mobile_number, 
+                        name_of_husband, next_of_kin, 
+                         next_of_kin_mobile, cust_edu_level, 
+                         resident_addr, bus_addr, marital_status, 
+                         type_of_bus, duration_of_bus, family_on_hcdti_group,
+                         savings_in_passbook, bank, account_no, member_owning_mfi, 
+                         mfi_name, guarantor, guarantor_rel, guarantor_addr, 
+                         guarantor_office_addr, group_recomm, is_leader):
+        grp = get_object_or_404(Groups, group_id=group_id)
+        grpm = GroupMember.objects.filter(groups_id=grp.group_id).count()
+        print(grpm)
+        if grpm >= 5:
+            cr_mem = GroupMember(group_id=grp.id,
+                                 groups_id=group_id,
+                                 member_name=member_name,
+                                 mobile_number=mobile_number,
+                                 is_leader=is_leader)
+            grpInfo = GroupMemberInfo(group_member=cr_mem, name_of_husband=name_of_husband, next_of_kin=next_of_kin, 
+                                      next_of_kin_mobile=next_of_kin_mobile,
+                                      cust_edu_level=cust_edu_level, resident_addr=resident_addr, bus_addr=bus_addr, 
+                                      marital_status=marital_status, type_of_bus=type_of_bus, duration_of_bus=duration_of_bus, 
+                                      family_on_hcdti_group=family_on_hcdti_group, savings_in_passbook=savings_in_passbook, 
+                                      bank=bank, account_no=account_no, member_owning_mfi=member_owning_mfi, mfi_name=mfi_name, 
+                                      guarantor=guarantor, guarantor_rel=guarantor_rel, guarantor_addr=guarantor_addr, 
+                                      guarantor_office_addr=guarantor_office_addr, group_recomm=group_recomm, active=True)
+            cr_mem.save()
+            grpInfo.save()
+            Groups.objects.filter(group_id=group_id).update(active=True)
+        else:
+            cr_mem = GroupMember(group_id=grp.id,
+                                 groups_id=group_id,
+                                 member_name=member_name,
+                                 mobile_number=mobile_number,
+                                 is_leader=is_leader)
+            # print()
+            grpInfo = GroupMemberInfo(group_member=cr_mem, name_of_husband=name_of_husband, next_of_kin=next_of_kin, 
+                                      next_of_kin_mobile=next_of_kin_mobile,
+                                      cust_edu_level=cust_edu_level, resident_addr=resident_addr, bus_addr=bus_addr, 
+                                      marital_status=marital_status, type_of_bus=type_of_bus, duration_of_bus=duration_of_bus, 
+                                      family_on_hcdti_group=family_on_hcdti_group, savings_in_passbook=savings_in_passbook, 
+                                      bank=bank, account_no=account_no, member_owning_mfi=member_owning_mfi, mfi_name=mfi_name, 
+                                      guarantor=guarantor, guarantor_rel=guarantor_rel, guarantor_addr=guarantor_addr, 
+                                      guarantor_office_addr=guarantor_office_addr, group_recomm=group_recomm, active=True)
+            cr_mem.save()
+            grpInfo.save()
+        pass
+
+
+
 """
 Function that calculate the loan Interest
 """
@@ -314,6 +364,7 @@ class General:
                         return Response(data=datas, status=status.HTTP_401_UNAUTHORIZED)
                     else:
                         createLoan = LoanApplication(
+                            member_id=gpm.id,
                             application_id=loanId, app_type=app_type,
                             form_no=formNo, state=state, member_no=memberNo,
                             branch=branch, fullname=gpm.member_name,
@@ -374,6 +425,7 @@ class General:
         app_type = data["app_type"]
         formNo = data["formNo"]
         state = data["state"]
+        group = data["group"]
         memberNo = data["phoneNo"]
         branch = data["branch"]
         fullname = data['fullname']
@@ -409,6 +461,7 @@ class General:
         newAmt = float(loanAppliedFor)
         try:
             while newAmt >= min_loan and newAmt <= max_loan:
+                
                 if LoanApplication.objects.filter(member_no=memberNo).exists():
                     datas = {
                         "code": status.HTTP_401_UNAUTHORIZED,
@@ -416,8 +469,35 @@ class General:
                         "reason": "Customer already have active Application"
                     }
                     return Response(data=datas, status=status.HTTP_401_UNAUTHORIZED)
+                
+                elif LoanApplication.objects.filter(form_no=formNo).exists():
+                    datas = {
+                        "code": status.HTTP_401_UNAUTHORIZED,
+                        "status": "fail",
+                        "reason": "Form No already exists Please use another number"
+                    }
+                    return Response(data=datas, status=status.HTTP_401_UNAUTHORIZED)
+                
+                elif GroupMember.objects.filter(mobile_number=memberNo).exists():
+                    datas = {
+                        "code": status.HTTP_401_UNAUTHORIZED,
+                        "status": "fail",
+                        "reason": "Customer with mobile already has active Group. Kindly Apply as Existing Customer"
+                    }
+                    return Response(data=datas, status=status.HTTP_401_UNAUTHORIZED)
+                
                 else:
+                    
+                    """Add Member to Group"""
+                    add_member_group_new(group, fullname, memberNo, nameOfFather, nextOfKin, phoneNextOfKin, formalEdu, residenceAddress, 
+                                         busnessAddress, maritalStatus, typeOfBusiness, businessDuration, familyOnHcdtiGroup, amtSavingsInPassbook, 
+                                         bank, accountNo, indeptedToMfbMfi, outsanding, nameOfGuarantor, guarantorRelationship, guarantorHomeAddress, 
+                                         guarantorOfficeAddress, recFromGroup2, is_leader=False)
+                    
+                    member_id = get_object_or_404(GroupMember, mobile_number=memberNo)
+
                     createLoan = LoanApplication(
+                        member_id=member_id.id,
                         application_id=loanId, app_type=app_type,
                         form_no=formNo, state=state, member_no=memberNo,
                         branch=branch, fullname=fullname,
@@ -438,7 +518,9 @@ class General:
                         guarantor_office_address=guarantorOfficeAddress, rec_from_group_1=recFromGroup1,
                         rec_from_group_2=recFromGroup2, credit_officer_name=creditOfficerName)
                     createLoan.save()
-
+                    
+                    
+                    
                     ## Send SMS Notification to the Customer ##
                     sms.sendMessage(memberNo, fullname,
                                     loanId, msg_type='CREDIT_APPROVED')

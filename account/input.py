@@ -6,6 +6,7 @@ class Input:
         app_type = request.data.get('appType')
         formNo = request.data.get('formNo')
         state = request.data.get('state')
+        group = request.data.get('group')
         fullname = request.data.get('fullname')
         nameOfFather = request.data.get('nameOfFather')
         phoneNo = request.data.get('phoneNo')
@@ -42,6 +43,7 @@ class Input:
             "app_type": app_type,
             "formNo": formNo,
             "state": state,
+            "group":group,
             "fullname": fullname,
             "phoneNo": phoneNo,
             "residenceAddress": residenceAddress,

@@ -159,6 +159,7 @@ class GroupMemberInfo(models.Model):
 
 
 class LoanApplication(models.Model):
+    member_id = models.BigIntegerField(blank=True, null=True)
     application_id = models.TextField(blank=True, null=True)
     app_type = models.TextField(null=True, blank=True)
     form_no = models.TextField(null=True, blank=True)

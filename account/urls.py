@@ -36,4 +36,5 @@ urlpatterns = [
     path('memberinfo/<str:id>', views.get_member_info),
     path('groupaction/<str:groupid>', views.groupAction),
     path('removeloan/<str:appid>', views.removeloan),
+    # path('getallmembers/', views.getAllMember),
 ]

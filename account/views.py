@@ -552,6 +552,7 @@ def get_all_group_member(request):
             datas = {}
             grp = get_object_or_404(
                 Groups, id=i.group_id, group_id=i.groups_id)
+            datas['id'] = i.id
             datas['groupId'] = i.groups_id
             datas['groupName'] = grp.group_name
             datas['memberName'] = i.member_name
@@ -1126,6 +1127,7 @@ def allLoan(request):
         snipet = LoanApplication.objects.filter(Q(credit_officer_approve='APPROVED', branch_manager_approve='PENDING') | Q(
             credit_officer_approve='APPROVED', branch_manager_approve='APPROVED') | Q(credit_officer_approve='APPROVED', branch_manager_approve='DECLINED'))
         datas = ShowAllLoanApplication(instance=snipet, many=True)
+        
         resp = {
             "code": status.HTTP_200_OK,
             "status": "success",
@@ -1277,3 +1279,23 @@ def removeloan(request, appid):
         }
         return Response(data=data, status=status.HTTP_401_UNAUTHORIZED)
     
+
+# @api_view(['GET'])
+# @permission_classes([IsAuthenticated])
+# def getAllMember(request):
+#     show = GroupMember.objects.filter()
+    
+#     lists = []
+#     for i in show:
+#         gp = get_object_or_404(Groups, group_id=i.groups_id)
+#         datas = {}
+#         datas['id'] = i.id
+#         datas['Name'] = i.member_name
+#         datas['groupName'] = gp.group_name
+#         datas['groupId'] = gp.group_id
+#         datas['mobileNo'] = i.mobile_number
+#         datas['dateJoin'] = i.date_added
+#         lists.append(datas)
+#     return Response(data=lists, status=status.HTTP_200_OK)
+        
+        
